@@ -34,13 +34,6 @@ def generate_content():
         return jsonify({"error": "Prompt is required"}), 400
 
     try:
-           data = request.get_json()
-    prompt = data.get('prompt')
-    
-    if not prompt:
-        return jsonify({"error": "Prompt is required"}), 400
-
-    try:
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=prompt,
@@ -49,9 +42,9 @@ def generate_content():
             )
         )
         return jsonify({"generatedText": response.text})
-        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # Load ML Model
 MODEL_PATH = 'Chrono_tree_model_refined.pkl'
