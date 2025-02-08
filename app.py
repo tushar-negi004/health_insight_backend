@@ -17,10 +17,10 @@ CORS(app)
 # Securely get API key from environment variables
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
-    raise ValueError("API key not found! Make sure it's in your .env file.")
+    raise ValueError("error")
 
 # Initialize the Gemini client
-client = genai.Client(api_key=API_KEY)
+client = genai.GenerativeModel(model_name="gemini-2.0-flash", api_key=API_KEY)
 
 sys_instruct = """only provide responses in paragraphs, no bullet points no list, no table and no special symbols should be used in the response. don't provide the code in any programming language(if someone asks) in such cases you can provide algorithm for such programs"""
 
@@ -33,13 +33,7 @@ def generate_content():
         return jsonify({"error": "Prompt is required"}), 400
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=sys_instruct
-            )
-        )
+        response = client.generate_content(prompt)  # Fixed the API call
         return jsonify({"generatedText": response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -71,5 +65,4 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+# No need for app.run() when using Gunicorn
