@@ -18,7 +18,7 @@ CORS(app)
 # Securely get API key from environment variables
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
-    raise ValueError("API key not found! Make sure it's in your .env file.")
+    raise ValueError("API key not found!")
 
 # Initialize the Gemini client
 client = genai.Client(api_key=API_KEY)
@@ -48,7 +48,7 @@ def generate_content():
 
 # Load ML Model
 MODEL_PATH = 'Chrono_tree_model_refined.pkl'
-MODEL_URL = "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/Chrono_tree_model_refined.pkl"
+MODEL_URL = "https://raw.githubusercontent.com/tushar-negi004/health_insight_backend/main/Chrono_tree_model_refined.pkl"
 
 if not os.path.exists(MODEL_PATH):
     response = requests.get(MODEL_URL)
@@ -78,5 +78,5 @@ def predict():
         return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
-    port = int(os.getenv("PORT", 5000))  # Fix Render port issue
-    app.run(host="0.0.0.0", port=port, debug=True)
+    port = int(os.getenv("PORT", 5000)) 
+    app.run(host="0.0.0.0", port=port, debug=False)
