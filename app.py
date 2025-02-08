@@ -34,9 +34,22 @@ def generate_content():
         return jsonify({"error": "Prompt is required"}), 400
 
     try:
-        model = client.get_model("gemini-1.5-flash")  # Fixed API call
-        response = model.generate_content(prompt)
+           data = request.get_json()
+    prompt = data.get('prompt')
+    
+    if not prompt:
+        return jsonify({"error": "Prompt is required"}), 400
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=sys_instruct
+            )
+        )
         return jsonify({"generatedText": response.text})
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
