@@ -6,6 +6,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import os
+import requests
 from dotenv import load_dotenv
 
 # Load environment variables from .env
@@ -17,10 +18,10 @@ CORS(app)
 # Securely get API key from environment variables
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
-    raise ValueError("error")
+    raise ValueError("API key not found! Make sure it's in your .env file.")
 
 # Initialize the Gemini client
-client = genai.GenerativeModel(model_name="gemini-2.0-flash", api_key=API_KEY)
+client = genai.Client(api_key=API_KEY)
 
 sys_instruct = """only provide responses in paragraphs, no bullet points no list, no table and no special symbols should be used in the response. don't provide the code in any programming language(if someone asks) in such cases you can provide algorithm for such programs"""
 
@@ -33,15 +34,20 @@ def generate_content():
         return jsonify({"error": "Prompt is required"}), 400
 
     try:
-        response = client.generate_content(prompt)  # Fixed the API call
+        model = client.get_model("gemini-1.5-flash")  # Fixed API call
+        response = model.generate_content(prompt)
         return jsonify({"generatedText": response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 # Load ML Model
 MODEL_PATH = 'Chrono_tree_model_refined.pkl'
+MODEL_URL = "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/Chrono_tree_model_refined.pkl"
+
 if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError(f"Model file '{MODEL_PATH}' not found!")
+    response = requests.get(MODEL_URL)
+    with open(MODEL_PATH, "wb") as f:
+        f.write(response.content)
 
 with open(MODEL_PATH, 'rb') as f:
     model = pickle.load(f)
@@ -65,4 +71,6 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-# No need for app.run() when using Gunicorn
+if __name__ == '__main__':
+    port = int(os.getenv("PORT", 5000))  # Fix Render port issue
+    app.run(host="0.0.0.0", port=port, debug=True)
